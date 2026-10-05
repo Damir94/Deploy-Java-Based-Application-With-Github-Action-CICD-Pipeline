@@ -1,1 +1,1 @@
-# DEPLOY A JAVA-BASED APPLICATION WITH GITHUB ACTION CI/CD PIPELINE
+# Deploy a Java-Based Application With GitHub Action CI/CD Pipeline
