@@ -176,3 +176,303 @@ steps:
           distribution: 'temurin'
           cache: maven
 ```
+
+<img width="1874" height="899" alt="Screenshot 2026-10-10 at 12 06 49 PM" src="https://github.com/user-attachments/assets/82675de5-a459-472e-bea3-2ee0af724225" />
+
+<img width="1875" height="579" alt="Screenshot 2026-10-10 at 12 06 55 PM" src="https://github.com/user-attachments/assets/cb38e1ea-29e7-426d-b53c-2e48990b94d8" />
+
+### Create a “runner”
+- We have to create an Ubuntu EC2 instance and SSH connect to it.
+- We will launch an ubuntu EC2 instance called “runner”. Go to EC2 dashboard
+- Click on “Launch Instance”
+- Give the instance a name, I will call it “runner”
+- On “AMI”, I will select “ubuntu”
+- On “Instance Type”, select “t2.medium”
+
+
+- Scroll down to “Key Pair”
+- Click on “Create new key pair”
+- Enter the name of the key pair, we will call it “runner-key”
+- Then click on “create key pair”
+
+
+- Then scroll down to “Network settings” and select “Allow SSH traffic from”, “Allow HTTPS traffic from internet”, “Allow HTTP traffic from internet”
+
+
+- One “Configure storage”, make it “20” GiB
+- Then click on “Launch Instance”
+- Click on “Instances”
+- You can see that the instance is initializing. Wait for it to pass the “2/2 check”
+- You can see that it has passed the “2/2 check”
+
+### SSH Connect to the Instance
+
+- We have to SSH connect to the EC2 instance we just created
+- Select the instance
+- Click on “Connect”
+- Copy the command:
+```bash
+ssh -i "runner-key.pem" ubuntu@ec2-174-129-114-216.compute-1.amazonaws.com
+```
+- Open Terminal and navigate to where your Key Pair .pem file is save. In my case it is saved in the Downloads folder.
+- Paste the copied command here and press enter
+- Enter “yes” and press “Enter”
+- We are now connected to the instance.
+
+### Install Tools
+
+- We have to install all the tools we need in this project as shown on the architecture.
+
+#### Install Maven
+- We have to first update the package using the command:
+```bash
+sudo apt update
+```
+- Then install Maven using the command:
+```bash
+sudo apt install maven -y
+```
+
+#### Install unzip
+- We have to install unzip but ley us first update the package using the command:
+```bash
+sudo apt-get update
+```
+- Then, run the command to install unzip
+```bash
+sudo apt-get install unzip
+```
+
+### Adding Private Runner
+
+- In this step we are going to add a virtual machine to serve as our private runner. To do this, we have to go to our GitHub repository
+- Get the commands from the GitHub Repository
+- Click on “Settings”
+- Click on the drop down on “Actions”
+- Select “Runners”
+- Click on “New self-hosted runner”
+- We are going to use “Linux”, so select “Linux”
+- Now, we have to run these commands on a virtual machine. So, we have to launch an EC2 instance to server as our virtual machine
+
+#### Download
+
+```bash
+# Create a folder
+$ mkdir actions-runner && cd actions-runner
+# Download the latest runner package
+$ curl -o actions-runner-linux-x64-2.329.0.tar.gz -
+L https://github.com/actions/runner/releases/download/v2.329.0/actions-runnerlinux-x64-2.329.0.tar.gz
+# Optional: Validate the hash
+$ echo "194f1e1e4bd02f80b7e9633fc546084d8d4e19f3928a324d512ea53430102e1d actionsrunner-linux-x64-2.329.0.tar.gz" | shasum -a 256 -c
+# Extract the installer
+$ tar xzf ./actions-runner-linux-x64-2.329.0.tar.gz
+```
+
+#### Configure
+```bash
+# Create the runner and start the configuration experience
+$ ./config.sh --url https://github.com/ebotsidneysmith/Java-Based-GithubAction --
+token BVAKISJXU3CWNDDV6MEXZF3I7BZ42
+# Last step, run it!
+$ ./run.sh
+```
+
+#### Using your self-hosted runner
+```bash
+# Use this YAML in your workflow file for each job
+runs-on: self-hosted
+```
+- We have to now run these commands on the terminal of our EC2 instance “runner”
+- We will first update the package using the command:
+```bash
+sudo apt update
+```
+- Create a folder called “actions-runner” using the command:
+```bash
+mkdir actions-runner
+```
+- Navigate to the created folder using the command:
+```bash
+cd actions-runner
+```
+- Download the latest runner package using this command:
+```bash
+curl -o actions-runner-linux-x64-2.329.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.329.0/actionsrunner-linux-x64-2.329.0.tar.gz
+```
+- Extract the installer using this command:
+```bash
+tar xzf ./actions-runner-linux-x64-2.329.0.tar.gz
+```
+- List the content of the folder using the command:
+```bash
+ls
+```
+- I am going to remove the action package using the command:
+```bash
+rm actions-runner-linux-x64-2.329.0.tar.gz
+```
+- Run the command to check the content again
+```bash
+ls
+```
+- Create the runner and start the configuration experience
+```bash
+./config.sh --url https://github.com/ebotsidneysmith/Java-Based-GithubAction --token BVAKISJVV6D35BC3FBVSI33I7FQMW
+```
+- In case you have this error, it means your runner is offline and it is not running. To resolve this go back to your runner on your GitHub.
+- You can see the runner is offline. Click on “New self-hosted runner”
+- Select “Linux”
+- Copy the above configure command:
+```bash
+./config.sh --url https://github.com/ebotsidneysmith/Java-BasedGithubAction --token BVAKISIBMQSCEWTHG6XYTZDI7RFTW
+```
+- Then run this command on your “runner” terminal
+- We do not have a runner group, so just press “Enter”
+- For the name of the runner, enter “Runner-1” and press “Enter”
+- For label, we will use “self-hosted”. Type “self-hosted” and press “Enter”
+- We will use the default work folder, so just press “Enter”
+- The runner is saved. So, we have set up our runner. Let us now start the runner using the command:
+```bash
+./run.sh
+```
+- We are now connected to GitHub. We can now go to our pipeline code and change all the “ubuntulatest” to “self-hosted”.
+- Commit the changes by clicking on “Commit changes”
+- Click on “commit changes” again
+- Then click on “Actions”
+- Click on the updated pipeline “Update cicd.yml"
+- You can see that the jobs have started running. Wait for it to run all the jobs
+- You can see that the three jobs are successful. Head back to our EC2 instance terminal
+- You can see that the runner is able to pick up our jobs
+
+### Adding the remaining jobs / stages
+
+- Now, we have to continue adding the remaining jobs to our Pipeline code. These jobs will be for code analysis with SonarQube, build and push docker image with Docker and finally deploying image to Kubernetes.
+
+#### Adding “build_project_and_sonar_scan” job
+
+- We will now add the job to build the code using Maven and perform code analysis with SonarQube. To do this, we will head back to VScode
+- Then let us add the code for the code analysis job. We will call the job “build_project_and_sonar_scan” that will run on our self-hosted runner, so we add the line “runs-on: self-hosted” and this job will need the test job. So, we add the line “needs: test”.
+```bash
+build_project_and_sonar_scan:
+ runs-on: self-hosted
+ needs: test
+```
+- Now, let us add the steps of this job. As usual, the first step is to fetch or check out the code using the line of code:
+```bash
+steps:
+ - uses: actions/checkout@v4
+```
+
+- The next step is to install Java JDK 17 using the code
+```bash
+- name: Set up JDK 17
+  uses: actions/setup-java@v4
+  with:
+    java-version: '17'
+    distribution: 'temurin'
+    cache: maven
+```
+
+- Now, let us add the code of the step to build the code using Maven
+```bash
+- name: Build Project
+  run: mvn package
+```
+
+- Next, we are going to create another action which will upload an artifact. So, we will be uploading the artifact, while in the next job we will be downloading the artifact.
+```bash
+-name: Upload JAR artifact
+ uses: actions/upload-artifact@v4
+   with:
+   name: app-jar
+   path: target/*.jar
+```
+- Before we add the code for code analysis with SonarQube, we have to first of all Launch an EC2 instance called “sonar-server” for SonarQube and install SonarQube on it.
+
+### Creating SonarQube Virtual Machine
+- We have to create a Ubuntu EC2 instance for SonarQube, SSH Connect to it and install SonarQube
+- We will call the instance “sonar-server”, AMI will be “ubuntu”, Instance type will be “t2.medium” and will enable port 9000 on the Network settings. Then configure storage will be “20” GiB.
+- The sonar-server has been created, let us now add port 9000. Select the instance “sonar-server”
+
+- Click on “Security” tab
+- Click on the “security Group” url
+- Click on “Edit inbound rules”
+- Click on “Add rule”
+- Enter “9000”
+- Click on the drop down and select “Anywhere-IPv4”
+- Click on “Save rules”
+- Port 9000 has been added
+
+### SSH Connect to the Instance
+- We will now SSH connect to the sonar-server instance
+- Select the instance
+- Click on “Connect”
+- Copy the command:
+```bash
+ssh -i "runner-key.pem" ubuntu@ec2-54-224-99-24.compute-1.amazonaws.com
+```
+- Open Terminal and navigate to where your Key Pair .pem file is save. In my case it is saved in the Downloads folder.
+- Paste the copied command here and press enter
+- Enter “yes” and press “Enter”
+- We are now connected to the instance.
+
+
+### Install Docker
+- Let us install SonarQube now but we have to first update the package using the command:
+```bash
+sudo apt update
+```
+- After this we will install Docker which will help set up SonarQube inside a Docker container. Run the command:
+```bash
+docker
+```
+- To install docker, we will run the command
+```bash
+sudo apt install docker.io -y
+```
+- By default, only root user has permission to execute docker commands. So, once you have installed docker, you need to make sure that the user has permission to execute docker commands. For that we have to add a user using the command:
+```bash
+sudo usermod -aG docker $USER
+```
+- We need to run a command which will make sure these changes are applied and they are reflecting:
+```bash
+newgrp docker
+```
+
+### Install SonarQube
+- Then we run the command to set up docker container with the name “sonar”
+```bash
+docker run -d --name sonar -p 9000:9000 sonarqube:lts-community
+```
+
+### Access SonarQube on Browser and configure it
+- Let us now try to access SonarQube on the browser using: That is http://<Public IPv4 address>:9000
+
+- Let is enter the username and password. Username is “admin” and password is also “admin”
+- Click on “Log in”
+- Let us modify the password
+- Click on “update”
+- We have to generate the SonarQube token.
+- Click on “Administration” tab
+- Click on the drop down on “security” tab
+- Select “users”
+- Click on “update token”
+- Enter the token name, I will call it “sonar-token”
+- Click on “Generate”
+- Copy the key and save it somewhere
+- Then click on “Done”
+
+### Create the file “sonar-project.properties” in our GitHub repository
+- We have to create a file called “sonar-project.properties”
+- Click on the drop down on “Add file”
+- Select “create new file”
+- Enter the file name as “sonar-project.properties”
+- Enter the following code:
+```bash
+sonar.projectKey=GC-Bank
+sonar.projectName=GC-Bank
+sonar.java.binaries=.
+```
+- Commit the changes by clicking on “commit changes”
+- Click on “commit changes” again
+- We have added the file.
