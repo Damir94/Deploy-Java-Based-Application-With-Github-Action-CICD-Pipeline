@@ -1,5 +1,7 @@
 # Deploy a Java-Based Application With GitHub Action CI/CD Pipeline
 
+<img width="674" height="245" alt="Screenshot 2026-10-10 at 10 39 00 AM" src="https://github.com/user-attachments/assets/172c7f64-5ef2-4e3b-a744-8612dc3c59f7" />
+
 ## Introduction
 - In this document, I will demonstrate how to deploy a Java-based application using GitHub Action Pipeline. In this, we have the concept of slave called runner. There will be some kind of server or virtual machine where the application is going to be built and whatever commands, we are going to be running will get executed.
 
