@@ -22,6 +22,14 @@ In this project, we are going to set up our own virtual machine and we are going
   - Push the docker image to Docker hub
   - Deploy the application to Kubernetes cluster
 
+### Create a GitHub repository and upload the project files to it
+- Select “New Repository”. Enter the name of the repository, we will call it “java-based-GithubAction”
+- Click on “Create Repository”
+- We have created the repository on GitHub
+
+### Upload project files to GitHub Repository
+- You can find project files and folder in this Github Repository and you clone it and upload them to your own github repository. 
+
 ### Create a Workflow and add .yml file
 
 - We have to create a workflow and add the .yml pipeline configuration file. Workflows in GitHub Action is like Pipeline in Jenkins. This involves creating a folder called “.github”, and then create another folder called “workflows” in the “.github” folder. Then create a workflow .yml file called cicd.yml.
