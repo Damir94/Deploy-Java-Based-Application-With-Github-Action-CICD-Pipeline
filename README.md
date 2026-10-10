@@ -46,3 +46,4 @@ In this project, we are going to set up our own virtual machine and we are going
 - Click on the Pipeline folder .github
 - Then, open the “cicd.yml” file by clicking on it.
 - We can now start editing the file. Click on “Edit”
+- Yaml is indentation sensitive. So, it is advisable to write the code of the workflow file on VSCode
