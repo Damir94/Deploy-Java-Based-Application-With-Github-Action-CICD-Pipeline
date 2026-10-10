@@ -47,3 +47,132 @@ In this project, we are going to set up our own virtual machine and we are going
 - Then, open the “cicd.yml” file by clicking on it.
 - We can now start editing the file. Click on “Edit”
 - Yaml is indentation sensitive. So, it is advisable to write the code of the workflow file on VSCode
+
+### Setting up the Pipeline
+
+- Here we will give the pipeline a name and add the events that will trigger the pipeline.
+- We can now start populating the file with code. First, we will give the Pipeline a name. We will call it “CICD Pipeline”
+```bash
+name: CICD Pipeline
+```
+
+### Add a Branch
+
+- Then we have to add an event that will trigger the workflow. Our event will be “push”, whenever you push a code to our “master” branch, this will trigger the workflow for the Pipeline to start running.
+- So, we have to add the main branch to our code as follows:
+```bash
+on:
+ push:
+ branches: ["main"]
+```
+
+### Start adding Jobs to the Pipeline file
+
+- We will add the jobs of the pipeline here.
+- Now, let us add the code for our first job called “compile”. Then we assign the shared runner, in this case we are using “ubuntu”. So, we will assign “ubuntu-latest” to use the latest version of ubuntu.
+```bash
+jobs:
+ compile:
+ runs-on: ubuntu-latest
+```
+- The first step in this job is to compile our source code using the actions “actions/checkout@v4” as first action which pulls a copy of the GitHub repository, “actions/setup-java@v4” as the second action in our first job which sets up environment for installing Java JDK.
+
+```bash
+steps:
+ - uses: actions/checkout@v4
+```
+
+- In the second step in this job, we define the version of JDK we want to install, in this case we want to install JDK 17 from temurin.
+```bash
+- name: Set up JDK 17
+ uses: actions/setup-java@v4
+ with:
+ java-version: '17'
+ distribution: 'temurin'
+ cache: maven
+```
+- The last thing in this job is to define the tool used for the build. Since it is a Java-based project, we will use Maven. So, we add the line with “name: Build with Maven” and add the command to compile with maven “run: mvn compile”
+```bash
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+
+ steps:
+ - uses: actions/checkout@v4
+ - name: Set up JDK 17
+   uses: actions/setup-java@v4
+   with:
+     java-version: '17'
+     distribution: 'temurin'
+     cache: maven
+ - name: Build with Maven
+   run: mvn compil
+```
+- We have added the stage ti compile our source code
+
+### Add the “security-check” job
+
+- In the second job, we will perform the security check. We will call this job “security-check”. This job will run after the first job, they do not have to run simultaneously. That is the jobs will run sequentially. It will need the first job to be completed first, so we add the line “needs: compile”
+```bash
+security-check:
+ runs-on: ubuntu-latest
+ needs: compile
+```
+- Then since we are running the jobs separately, we have to check out the code again. We have to add the step to check out the code.
+```bash
+steps:
+ - uses: actions/checkout@v4
+```
+- The next step in this job is to install Trivy, since Trivy might not be installed in the shared runner. We will call the step “Trivy Installation”. Then, the next part of this step is to run the command to install Trivy. Since it is multiple lines of command, we use the pipe (|).
+```bash
+- name: Trivy Installation
+        run: |
+          sudo apt-get install -y wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update -y
+          sudo apt-get install -y trivy
+```
+
+- This is going to install Trivy on our shared runner. The second step in this job is to scan the Java code and its dependencies for vulnerabilities using Trivy. We will call this step “Trivy FS Scan” and the command to scan the code will be “run: trivy fs”.
+
+```bash
+- name: Trivy FS Scan
+ run: trivy fs --format table -o fs-report.json .
+```
+
+- The next step is to perform Gitleaks. Gitleaks is a tool that is going to find in your source code if you have any kind of sensitive data hard coded for example API tokens, secret key, access key which should not be hard coded in the source code. So, we have to install Gitleaks.
+- We will call this step “Gitleaks Installation”, the run the command to install Gitleaks “run: sudo apt install gitleaks -y”
+```bash
+- name: Gitleaks Installation
+  run: sudo apt install gitleaks -y
+```
+
+- Finally, we will add the step is to perform scanning with Gitleaks. We will call the step “Gitleaks Code Scan” and run the command using this line of code “run: gitleaks detect source . -r gitleaks-report.json -f json”
+```bash
+- name: Gitleaks Code Scan
+  run: gitleaks detect source . -r gitleaks-report.json -f json
+```
+
+### Add the “test” job
+
+- In the third job, we will perform the test. We will call this job “test”. The test will be done with Maven. This job will run after the second job, they do not have to run simultaneously or parallelly. That is the jobs will run sequentially. It will need the first job to be completed first, so we add the line “needs: security-check”
+```bash
+test:
+ runs-on: ubuntu-latest
+ needs: secur
+```
+- Then since we are running the jobs separately, we have to check out the code again. We have to add the step to check out the code
+```bash
+steps:
+   - uses: actions/checkout@v4
+```
+- In the second step in this job, we define the version of JDK we want to install, in this case we want to install JDK 17 from temurin.
+```bash
+ - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+```
