@@ -381,11 +381,11 @@ steps:
 
 - Next, we are going to create another action which will upload an artifact. So, we will be uploading the artifact, while in the next job we will be downloading the artifact.
 ```bash
--name: Upload JAR artifact
- uses: actions/upload-artifact@v4
-   with:
-   name: app-jar
-   path: target/*.jar
+- name: Upload JAR artifact
+  uses: actions/upload-artifact@v4
+    with:
+    name: app-jar
+    path: target/*.jar
 ```
 - Before we add the code for code analysis with SonarQube, we have to first of all Launch an EC2 instance called “sonar-server” for SonarQube and install SonarQube on it.
 
@@ -476,3 +476,438 @@ sonar.java.binaries=.
 - Commit the changes by clicking on “commit changes”
 - Click on “commit changes” again
 - We have added the file.
+
+### Adding Actions related to SonarQube
+- Let us now go to our pipeline and add the job for SonarQube. First search on google for “SonarQube Action”
+- Click on “SonarSource/sonarqube-scan-action”
+- Scroll down
+- Copy this and add on your code and add to your pipeline code
+```bash
+- uses: actions/checkout@v4
+  with:
+    # Disabling shallow clones is recommended for improving the relevancy of reporting
+    fetch-depth: 0
+- name: SonarQube Scan
+  uses: SonarSource/sonarqube-scan-action@v6.0.0
+  env:
+    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+```
+
+- You can get the latest version by going to
+```bash
+https://github.com/marketplace/actions/official-sonarqube-scan
+```
+- You can see the latest version is 6.0.0. We have to change the version on the pipeline code to 6.0.0. So, we modify the code as follows:
+```bash
+- uses: actions/checkout@v4
+ with:
+   # Disabling shallow clones is recommended for improving the relevancy of reporting
+   fetch-depth: 0
+- name: SonarQube Scan
+ uses: SonarSource/sonarqube-scan-action@v6.0.0 # Ex: v4.1.0, See the latest version at https://github.com/marketplace/actions/official-sonarqube-scan
+ env:
+   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+   SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+```
+
+### Adding the Action / Steps “SonarQube Quality Check”
+- Now, let us add a step for SonarQube quality gate check. Go to google and search for “SonarQube Quality Check”
+- Click on “SonarSource/sonarqube-quality-gate-action”
+- Copy the code for Quality Gate check
+```bash
+- name: SonarQube Quality Gate check
+  id: sonarqube-quality-gate-check
+  uses: sonarsource/sonarqube-quality-gate-action@master
+  with:
+   pollingTimeoutSec: 600
+  env:
+   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+   SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }} #OPTIONAL
+```
+- We can now transfer this code to our Pipeline file in the GitHub repository and commit the changes
+
+### Adding SonarQube Secret and Variables on GitHub Action
+- Now we have two important things to add, that is Token and URL. We have to add “SONAR_TOKEN” and “SONAR_HOST_URL” to the settings in our GitHub repository.
+
+#### Part 1: Adding the secret “SONAR_TOKEN”
+- Go to our GitHub repository
+- Click on “settings”
+- Click on the drop down on “Secrets and Variables”
+- Select “Actions”
+- Click on “New repository secret”
+- On “name”, enter “SONAR_TOKEN”
+- On “Secret”, enter the SonarQube key we copied above.
+- Then click on “Add Secret”
+- We have added a secret.
+
+### Adding the Variable “SONAR_HOST_URL”
+- Let us add the variable that is “SONAR_HOST_URL”.
+- Select the “Variable” tab
+- Click on “New repository variable”
+- On “name”, enter “SONAR_HOST_URL”
+- On “Value”, go to the SonarQube browser
+- Copy the highlighted part and paste on the “value” field in GitHub
+- Click on “Add Variable”
+- We have added our variables.
+
+### Test the jobs that have been added
+- Let us test the jobs that we have added so far by running the pipeline.
+- We can now transfer this code to our Pipeline file in the GitHub repository and commit the changes
+- Click on “Actions”
+- Click on “Update cicd.yml”, make sure the runner is running
+- You can see that the pipeline is successful. Go to SonarQube browser and click on “Projects”
+- Click on “GC-Bank”
+- You can see that the analysis has been done and it works fine.
+
+### Adding the remaining jobs
+- We will be adding the remaining jobs in this step
+
+#### Adding “build_docker_image_and_push” job
+- We will now add the job to build and push the docker image using Docker. To do this, we have to first install Docker on our runner.
+- Go to the terminal of our “runner”.
+- Check if docker is install by using the command:
+```bash
+docker
+```
+- You can see that Docker has not been installed on our “runner”.
+
+### Install Docker
+- Let us now install docker.
+- Go to google and search for “docker install ubuntu”
+- Click on “Install Docker Engine on Ubuntu”
+- Copy these commands
+```bash
+# Add Docker's official GPG key:
+sudo apt-get update
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o
+/etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+# Add the repository to Apt sources:
+echo \
+ "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc]
+https://download.docker.com/linux/ubuntu \
+ $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+ sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+```
+- Run the copied commands on the terminal of our runner EC2 instance
+- We will now run this command to install Docker
+- Then copy the above command
+```bash
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+```
+- Run it too on the terminal of the runner EC2 instance
+- Type “Y” and press “Enter”
+- Docker has been installed; we have to set permissions so that it can execute docker commands. We do this by running the command:
+```bash
+sudo usermod -aG docker ubuntu
+```
+- In order to apply changes, we run the command:
+```bash
+newgrp docker
+```
+- Now, we have to add the code of the job to build and push the docker image. We head back to VSCode
+- Adding the job to build and push docker image. Search for “actions build and push docker image”
+- Click on “Build and push Docker images – Actions”
+- Scroll down
+- Copy this code and modify it
+- he name of the job is “build_docker_image_and_push”. It will run on our self-hosted runner, so we will add the like “runs-on: self-hosted”. This job depends on the previous job that is “build_docker_image_and_push”, so we add the line “needs: build_project_and_sonar_scan”.
+```bash
+build_docker_image_and_push:
+    runs-on: self-hosted
+    needs: build_project_and_sonar_scan
+```
+- The next thing is to add the steps. The first step is check out or fetch our code
+```bash
+steps:
+      - uses: actions/checkout@v4
+```
+- The second step is to download the Jar artifacts that was uploaded in the previous stage / job.
+```bash
+- name: Download JAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-jar
+          path: app  # this will download JAR to ./app folder
+```
+- The next step is to login to the docker hub.
+```bash
+ - name: Login to Docker Hub
+   uses: docker/login-action@v3
+   with:
+      username: ${{ vars.DOCKERHUB_USERNAME }}
+      password: ${{ secrets.DOCKERHUB_TOKEN }}
+```
+- Then we set up qemu
+```bash
+ - name: Set up QEMU
+   uses: docker/setup-qemu-action@v3
+```
+- Then we set up docker build
+```bash
+- name: Set up Docker Buildx
+  uses: docker/setup-buildx-action@v3
+```
+- Then we build and push the docker image to my docker hub with the repository name “bankapp” and my docker hub account is your dockerhub username.
+```bash
+- name: Build and Push Docker image
+  uses: docker/build-push-action@v6
+  with:
+    context: .
+    push: true
+    tags: dockerhubusername/bankapp:latest
+    file: ./Dockerfile
+```
+- We have completed writing the code for this job. Let us copy the code from IntelliJ and paste on our Pipeline file in GitHub.
+- Then, commit the changes by clicking on “commit changes”
+- Confirm by clicking on “commit changes” again
+- Click on “Actions”
+- And click on “Update cicd.yml”
+- You can see that the pipeline is not running. This is because our “runner” is offline. Let us go and start the runner now.
+
+- First SSH connect to our runner instance
+- Navigate to the “actions-runner” folder using the command
+```bash
+cd actions-runner
+```
+- Then start the runner using the command:
+```bash
+./run.sh
+```
+- You can see that the runner has started running and the jobs have started running. We expect it to fail because we have not added our Docker login name and password.
+- It failed as expected. Go back to the GitHub repository. This is because we have not yet added Docker username and password as variable and secret respectively on the GitHub Action
+
+### Adding Secret and Variables oof Docker on the GitHub Action
+- We are going to add added Docker username and password as variable and secret respectively on the GitHub Action.
+- Click on “Settings”
+- Then click on “secret and variables”
+- Select “Actions”
+- Now, we have to add our docker login password. Click on “New repository secret”
+- For “name”, enter “DOCKERHUB_TOKEN”
+- And for “secret”, enter your docker password “xxxxxxx”
+- Click on “Add secret”
+- Now, let us add the docker login username. This is a variable. So, click on the variable tab above
+- Then click on “New repository variable”
+- On “name”, enter “DOCKERHUB_USERNAME"
+- And on “value”, enter “ebotsidneysmith”
+- Then click on “Add variable”
+- You can now go and re-run the pipeline. Click on “Action”
+- Click on the “update cicd.yml”
+- Click on re-run jobs and select “Re-run all jobs”
+- Click on “Re-run jobs”
+- The jobs have started running
+- You can see that the build is successful. Go now to the docker hub and check if the image is there
+- You can see our docker image
+
+### Adding “deploy_to_kubernetes” job
+- We will now add the job to deploy the docker image on Kubernetes. To do this, we will start by setting up EKS cluster using Terraform. For this we will create a new EC2 instance called “eks-server”.
+
+#### Create Ubuntu EC2 instance for “eks-server”
+- We will call the instance “eks-server”, AMI will be “ubuntu”, Instance type will be “t2.medium” and the configure storage will be “20”. Then SSH connect to the “eks-server”.
+- Select the “eks-server” instance
+
+### SSH Connect to the EC2 instance
+- Now, let us SSH connect to the EKS server. Select the instance
+- Click on “Connect”
+- Copy the command above:
+```bash
+ssh -i "runner-key.pem" ubuntu@ec2-98-91-200-7.compute-1.amazonaws.com
+```
+- Then open terminal and navigate to where the Key pair file .pem file is saved. It is saved in our Downloads folder
+- Then run the command:
+```bash
+ssh -i "runner-key.pem" ubuntu@ec2-98-91-200-7.compute-1.amazonaws.com
+```
+- Type “yes” and press “Enter”
+- We are now connected to our EKS server. We have to install two things, namely AWS CLI and Minkube.
+
+### Install AWS CLI
+- Let us install AWS CLI, to do this we will first update the package using the command:
+```bash
+sudo apt update
+```
+- Now, let us install AWS CLI using the command:
+```bash
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+sudo apt install unzip
+unzip awscliv2.zip
+sudo ./aws/install
+```
+- AWS CLI has been installed. We are going to use the AWS CLI to connect to our account. To do this we will first create a “Security Credential”. Go to AWS Management console
+- Click on your username
+- Select “Security Credentials”
+- Click on “Create Access Key”
+- Select “Command Line Interface (CLI)”
+- Check the box “I understand the above recommendation and want to proceed to create an access key”
+- Click on “next”
+- Click on “Create access key”
+- Click on “Download .csv file” to download the file containing your access and secret keys
+- Then click on “Done”
+- Now, let us connect to our AWS account using the command:
+```bash
+aws configure
+```
+- Enter the Access key generated in the downloaded file
+```bash
+aws configure
+```
+- Enter the Access key generated in the downloaded file
+- Then enter the secret key
+- Then enter your region, my region is “us-east-1”
+- For “default output format [None]”, press “Enter”
+- The next thing we have to do is to install Terraform. To install Terraform on an Ubuntu EC2 instance, follow these steps:
+
+### Install Terraform
+- Update and upgrade system Packages:
+```bash
+sudo apt update && sudo apt upgrade -y
+```
+- Install Required Dependencies:
+```bash
+sudo apt install -y software-properties-common gnupg2 curl
+```
+- Add HashiCorp GPG Key:
+```bash
+curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o
+/usr/share/keyrings/hashicorp-archive-keyring.gpg
+```
+- Add HashiCorp Repository:
+```bash
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg]
+https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee
+/etc/apt/sources.list.d/hashicorp.list
+```
+- Update Package List Again:
+```bash
+sudo apt update
+```
+- Install Terraform:
+```bash
+sudo apt install terraform -y
+```
+- Verify Installation:
+```bash
+terraform -version
+```
+- The next thing to do is to create EKS cluster. We will create the EKS cluster on AWS using Terraform. To do this we will create another GitHub repository called “EKS-Terraform”
+
+### Create EKS Cluster GitHub Repository
+- Go back to GitHub and create this repository.
+- Click on “Create Repository”
+
+### Upload files to the Repository
+- Let us now upload the files of this project from our local machine to the GitHub repository. The project files are located at:
+```bash
+https://github.com/ebotsidneysmith/EKS-Terraform
+```
+- Open terminal and We will clone the repository by using the command
+```bash
+git clone https://github.com/ebotsidneysmith/EKS-Terraform.git
+```
+- Let us move into the repository using the command:
+```bash
+cd EKS-Terraform
+```
+- Let us Initialize the directory containing Terraform using the command:
+```bash
+terraform init
+```
+- Then let us set up the EKS cluster on the AWS account by using the command:
+```bash
+terraform apply --auto-approve
+```
+- The EKS cluster has been created. You can verify this by checking on your AWS
+- You can see that the cluster has been created and it is “Active”
+
+### Install Kubectl
+- Next thing to do is to install kubectl to enable us to access the cluster using the commands:
+```bash
+curl -LO "https://dl.k8s.io/release/$(curl -L -s
+https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+curl -LO "https://dl.k8s.io/release/$(curl -L -s
+https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+kubectl version --client
+```
+- We have to now connect to our cluster. To do this we have to set up the kubeconfig file by using the command:
+```bash
+aws eks --region us-east-1 update-kubeconfig --name devopsshack-cluster
+```
+- Then verify if you can see node by using the command:
+```bash
+kubectl get nodes
+```
+- You can see our nodes.
+- We will now have to add the Kubernetes secret on our GitHub Action. To do this, open the kubeconfig file by using the command:
+```bash
+cat ~/.kube/config
+```
+- We will copy the code in this file
+- Then head back to the GitHub Action repository
+- Click on “Settings”
+- Then click on “Secrets and Variables”
+- Click on “Actions”
+- Then click on “New repository secret”
+- Then for “name”, enter “EKS_KUBECONFIG” that we will use in the code of the job
+- The for “secret”, enter the code we copied from our kube config file
+- Then click on “Add secret”
+- The secret has been added.
+
+### Adding the job
+- Now, let us go ahead to add our job to deploy the image to EKS cluster. We will call this job “deploy_to_kubernetes”. It will run on our private runner, so we add the line “runs-on: self-hosted”. For this job to start, we will need the previous job “build_docker_image_and_push”, so we will add the line “needs: build_docker_image_and_push”. 
+```bash
+deploy_to_kubernetes:
+    runs-on: self-hosted
+    needs: build_docker_image_and_push
+```
+- We now have to start adding the steps / action. Our first step will be to check out of fetch the code from the GitHub repository. This will be named “Checkout Code” and the action will be “actions/checkout@v4”
+```bash
+steps:
+  - name: Checkout Code
+  uses: actions/checkout@v4
+```
+- The next step will be to install AWS CLI
+```bash
+- name: Install AWS CLI
+  run: |
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+    unzip awscliv2.zip
+    sudo ./aws/install --update
+```
+- Next, we will login to our AWS account using the AWS Access and Secret keys
+```bash
+- name: Configure AWS credentials
+  uses: aws-actions/configure-aws-credentials@v2
+  with:
+    aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    aws-region: us-east-1
+```
+- Then, we will setup kubectl to enable us to access the cluster
+```bash
+- name: Set up kubectl
+  uses: azure/setup-kubectl@v3
+  with:
+    version: latest
+```
+- Next thing to do is to configure our kubeconfig file
+```bash
+- name: Configure kubeconfig
+  run: |
+    mkdir -p $HOME/.kube
+    echo "${{ secrets.EKS_KUBECONFIG }}" > $HOME/.kube/config
+```
+- And finally, we will deploy the docker image to EKS
+```bash
+- name: Deploy to EKS
+  run: |
+    kubectl apply -f ds.yml
+```
+- Let us go and re-run the pipeline again
+- The Pipeline is successful
+
+### Deleting resources
+- Please, do not forget to delete the resources such as EKS cluster to avoid billing.
