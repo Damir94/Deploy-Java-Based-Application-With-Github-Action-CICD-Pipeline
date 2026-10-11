@@ -60,6 +60,10 @@ jobs:
 
           trivy --version
 
+      - name: Resolve Maven Dependencies
+        run: |
+          mvn -B -ntp dependency:go-offline
+          
       - name: Trivy Filesystem Scan
         run: trivy fs --format json --output fs-report.json .
 
