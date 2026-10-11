@@ -188,7 +188,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ebotsidneysmith/bankapp:latest
+          tags: abdurakhimovda522/bankapp:latest
           file: ./Dockerfile
 
   # Stage 6: Deploy to Amazon EKS
