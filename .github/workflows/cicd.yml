@@ -55,6 +55,9 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: Resolve Maven dependencies 
+        run: mvn -B dependency:go-offline dependency:resolve-plugins
+  
   build_project_and_sonar_scan:
     runs-on: self-hosted
     needs: test
