@@ -579,9 +579,17 @@ https://github.com/marketplace/actions/official-sonarqube-scan
 - We can now transfer this code to our Pipeline file in the GitHub repository and commit the changes
 - Click on “Actions”
 - Click on “Update cicd.yml”, make sure the runner is running
-- You can see that the pipeline is successful. Go to SonarQube browser and click on “Projects”
-- Click on “GC-Bank”
+- You can see that the pipeline is successful.
+
+<img width="1889" height="563" alt="Screenshot 2026-10-11 at 1 53 24 PM" src="https://github.com/user-attachments/assets/3e939d75-1161-44a9-9868-9d3d25521990" />
+
+- Go to SonarQube browser and click on “Projects”
+- Click on “Deploy Java Application”
 - You can see that the analysis has been done and it works fine.
+
+<img width="1070" height="285" alt="Screenshot 2026-10-11 at 1 55 05 PM" src="https://github.com/user-attachments/assets/9d9db315-1cf8-4c96-9c52-b5cf20277e90" />
+
+<img width="1518" height="779" alt="Screenshot 2026-10-11 at 1 55 45 PM" src="https://github.com/user-attachments/assets/b87b37bc-5441-4bfd-b822-12ded621e7e3" />
 
 ### Adding the remaining jobs
 - We will be adding the remaining jobs in this step
@@ -625,6 +633,9 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin 
 - Run it too on the terminal of the runner EC2 instance
 - Type “Y” and press “Enter”
 - Docker has been installed; we have to set permissions so that it can execute docker commands. We do this by running the command:
+
+<img width="834" height="239" alt="Screenshot 2026-10-11 at 2 00 38 PM" src="https://github.com/user-attachments/assets/fa6adabd-8862-42b7-92fd-ec566bf43604" />
+
 ```bash
 sudo usermod -aG docker ubuntu
 ```
@@ -712,18 +723,33 @@ cd actions-runner
 - For “name”, enter “DOCKERHUB_TOKEN”
 - And for “secret”, enter your docker password “xxxxxxx”
 - Click on “Add secret”
+
+<img width="1253" height="249" alt="Screenshot 2026-10-11 at 2 05 44 PM" src="https://github.com/user-attachments/assets/8756368e-7efa-4bca-b62b-56fce509b9df" />
+
 - Now, let us add the docker login username. This is a variable. So, click on the variable tab above
 - Then click on “New repository variable”
 - On “name”, enter “DOCKERHUB_USERNAME"
-- And on “value”, enter “ebotsidneysmith”
+- And on “value”,
 - Then click on “Add variable”
+
+<img width="1229" height="259" alt="Screenshot 2026-10-11 at 2 07 29 PM" src="https://github.com/user-attachments/assets/a6d7ba97-8dd0-4c9c-929e-0dbedbde4599" />
+
 - You can now go and re-run the pipeline. Click on “Action”
 - Click on the “update cicd.yml”
 - Click on re-run jobs and select “Re-run all jobs”
 - Click on “Re-run jobs”
 - The jobs have started running
-- You can see that the build is successful. Go now to the docker hub and check if the image is there
+- You can see that the build is successful.
+
+<img width="1443" height="317" alt="Screenshot 2026-10-11 at 2 14 22 PM" src="https://github.com/user-attachments/assets/75d8181a-d27c-422d-a22a-904f78b8f51b" />
+
+<img width="833" height="308" alt="Screenshot 2026-10-11 at 2 15 10 PM" src="https://github.com/user-attachments/assets/dc894d7a-28f6-4cdf-b307-0ab5b8ef9c85" />
+
+
+- Go now to the docker hub and check if the image is there
 - You can see our docker image
+
+<img width="1652" height="256" alt="Screenshot 2026-10-11 at 2 15 39 PM" src="https://github.com/user-attachments/assets/6a0dbee7-904e-4d1c-80d0-0c7d2e0294fc" />
 
 ### Adding “deploy_to_kubernetes” job
 - We will now add the job to deploy the docker image on Kubernetes. To do this, we will start by setting up EKS cluster using Terraform. For this we will create a new EC2 instance called “eks-server”.
@@ -731,6 +757,8 @@ cd actions-runner
 #### Create Ubuntu EC2 instance for “eks-server”
 - We will call the instance “eks-server”, AMI will be “ubuntu”, Instance type will be “t2.medium” and the configure storage will be “20”. Then SSH connect to the “eks-server”.
 - Select the “eks-server” instance
+
+<img width="1604" height="298" alt="Screenshot 2026-10-11 at 2 17 31 PM" src="https://github.com/user-attachments/assets/2acde006-626e-4742-b7e0-e08065847391" />
 
 ### SSH Connect to the EC2 instance
 - Now, let us SSH connect to the EKS server. Select the instance
@@ -747,6 +775,8 @@ ssh -i "runner-key.pem" ubuntu@ec2-98-91-200-7.compute-1.amazonaws.com
 - Type “yes” and press “Enter”
 - We are now connected to our EKS server. We have to install two things, namely AWS CLI and Minkube.
 
+<img width="749" height="230" alt="Screenshot 2026-10-11 at 2 18 21 PM" src="https://github.com/user-attachments/assets/0b49bbcd-730c-4123-89d7-be92cd93479e" />
+
 ### Install AWS CLI
 - Let us install AWS CLI, to do this we will first update the package using the command:
 ```bash
@@ -759,6 +789,9 @@ sudo apt install unzip
 unzip awscliv2.zip
 sudo ./aws/install
 ```
+
+<img width="706" height="86" alt="Screenshot 2026-10-11 at 2 19 55 PM" src="https://github.com/user-attachments/assets/d2726461-c198-4cb5-8158-35d454e2b530" />
+
 - AWS CLI has been installed. We are going to use the AWS CLI to connect to our account. To do this we will first create a “Security Credential”. Go to AWS Management console
 - Click on your username
 - Select “Security Credentials”
@@ -815,6 +848,9 @@ sudo apt install terraform -y
 ```bash
 terraform -version
 ```
+
+<img width="821" height="377" alt="Screenshot 2026-10-11 at 2 27 17 PM" src="https://github.com/user-attachments/assets/a88a868b-ba1d-4184-9d8a-85d5e2eb8ea1" />
+
 - The next thing to do is to create EKS cluster. We will create the EKS cluster on AWS using Terraform. To do this we will create another GitHub repository called “EKS-Terraform”
 
 ### Create EKS Cluster GitHub Repository
@@ -830,6 +866,9 @@ https://github.com/ebotsidneysmith/EKS-Terraform
 ```bash
 git clone https://github.com/ebotsidneysmith/EKS-Terraform.git
 ```
+
+<img width="836" height="224" alt="Screenshot 2026-10-11 at 2 29 50 PM" src="https://github.com/user-attachments/assets/fdf3b1fb-3185-4eb6-b19f-195478f9e098" />
+
 - Let us move into the repository using the command:
 ```bash
 cd EKS-Terraform
@@ -845,6 +884,8 @@ terraform apply --auto-approve
 - The EKS cluster has been created. You can verify this by checking on your AWS
 - You can see that the cluster has been created and it is “Active”
 
+<img width="1559" height="265" alt="Screenshot 2026-10-11 at 2 42 31 PM" src="https://github.com/user-attachments/assets/c0303592-0af1-4296-89d3-32b37edd8c2c" />
+
 ### Install Kubectl
 - Next thing to do is to install kubectl to enable us to access the cluster using the commands:
 ```bash
@@ -855,14 +896,23 @@ https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl.sha256"
 sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 kubectl version --client
 ```
+
+<img width="690" height="99" alt="Screenshot 2026-10-11 at 2 45 41 PM" src="https://github.com/user-attachments/assets/58dec840-1431-447b-9b5b-2b8802f4cd17" />
+
 - We have to now connect to our cluster. To do this we have to set up the kubeconfig file by using the command:
 ```bash
 aws eks --region us-east-1 update-kubeconfig --name devopsshack-cluster
 ```
+
+<img width="846" height="98" alt="Screenshot 2026-10-11 at 2 46 31 PM" src="https://github.com/user-attachments/assets/2ba36983-3604-4946-b7c6-ec617fd92c69" />
+
 - Then verify if you can see node by using the command:
 ```bash
 kubectl get nodes
 ```
+
+<img width="688" height="137" alt="Screenshot 2026-10-11 at 2 58 29 PM" src="https://github.com/user-attachments/assets/8c7269e0-6d48-4917-8d51-a4410196122b" />
+
 - You can see our nodes.
 - We will now have to add the Kubernetes secret on our GitHub Action. To do this, open the kubeconfig file by using the command:
 ```bash
@@ -878,6 +928,8 @@ cat ~/.kube/config
 - The for “secret”, enter the code we copied from our kube config file
 - Then click on “Add secret”
 - The secret has been added.
+
+<img width="1219" height="335" alt="Screenshot 2026-10-11 at 3 00 42 PM" src="https://github.com/user-attachments/assets/55d1e8e7-00de-4699-a2f3-72e533f2e6fb" />
 
 ### Adding the job
 - Now, let us go ahead to add our job to deploy the image to EKS cluster. We will call this job “deploy_to_kubernetes”. It will run on our private runner, so we add the line “runs-on: self-hosted”. For this job to start, we will need the previous job “build_docker_image_and_push”, so we will add the line “needs: build_docker_image_and_push”. 
@@ -931,6 +983,10 @@ steps:
 ```
 - Let us go and re-run the pipeline again
 - The Pipeline is successful
+
+<img width="1897" height="575" alt="Screenshot 2026-10-11 at 3 10 37 PM" src="https://github.com/user-attachments/assets/37f7cbb9-3829-4d63-b2ba-c55f348d28f3" />
+
+<img width="807" height="416" alt="Screenshot 2026-10-11 at 3 11 05 PM" src="https://github.com/user-attachments/assets/23ff109f-7254-4481-98e4-04f73180dd08" />
 
 ### Deleting resources
 - Please, do not forget to delete the resources such as EKS cluster to avoid billing.
