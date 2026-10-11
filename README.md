@@ -394,6 +394,8 @@ steps:
 - We will call the instance “sonar-server”, AMI will be “ubuntu”, Instance type will be “t2.medium” and will enable port 9000 on the Network settings. Then configure storage will be “20” GiB.
 - The sonar-server has been created, let us now add port 9000. Select the instance “sonar-server”
 
+<img width="1602" height="86" alt="Screenshot 2026-10-11 at 1 24 25 PM" src="https://github.com/user-attachments/assets/f02881d6-afed-4199-8bc6-dab385d2ae15" />
+
 - Click on “Security” tab
 - Click on the “security Group” url
 - Click on “Edit inbound rules”
@@ -402,6 +404,8 @@ steps:
 - Click on the drop down and select “Anywhere-IPv4”
 - Click on “Save rules”
 - Port 9000 has been added
+
+<img width="1552" height="73" alt="Screenshot 2026-10-11 at 1 25 00 PM" src="https://github.com/user-attachments/assets/99f20da3-c57d-4123-8808-7b7e05fa63c0" />
 
 ### SSH Connect to the Instance
 - We will now SSH connect to the sonar-server instance
@@ -416,6 +420,7 @@ ssh -i "runner-key.pem" ubuntu@ec2-54-224-99-24.compute-1.amazonaws.com
 - Enter “yes” and press “Enter”
 - We are now connected to the instance.
 
+<img width="815" height="235" alt="Screenshot 2026-10-11 at 1 26 30 PM" src="https://github.com/user-attachments/assets/83cf9a3d-8a95-4094-bffd-518458e973d3" />
 
 ### Install Docker
 - Let us install SonarQube now but we have to first update the package using the command:
@@ -430,6 +435,9 @@ docker
 ```bash
 sudo apt install docker.io -y
 ```
+
+<img width="818" height="238" alt="Screenshot 2026-10-11 at 1 27 56 PM" src="https://github.com/user-attachments/assets/35538c5c-5977-4c50-bb2f-71e64064390a" />
+
 - By default, only root user has permission to execute docker commands. So, once you have installed docker, you need to make sure that the user has permission to execute docker commands. For that we have to add a user using the command:
 ```bash
 sudo usermod -aG docker $USER
@@ -445,13 +453,20 @@ newgrp docker
 docker run -d --name sonar -p 9000:9000 sonarqube:lts-community
 ```
 
+<img width="835" height="432" alt="Screenshot 2026-10-11 at 1 29 04 PM" src="https://github.com/user-attachments/assets/cebe148e-cab6-4b5b-828a-f8579202dad3" />
+
 ### Access SonarQube on Browser and configure it
 - Let us now try to access SonarQube on the browser using: That is http://<Public IPv4 address>:9000
+
+<img width="1457" height="385" alt="Screenshot 2026-10-11 at 1 30 31 PM" src="https://github.com/user-attachments/assets/0471833d-5788-4973-85a6-22f6200759aa" />
 
 - Let is enter the username and password. Username is “admin” and password is also “admin”
 - Click on “Log in”
 - Let us modify the password
 - Click on “update”
+
+<img width="1204" height="689" alt="Screenshot 2026-10-11 at 1 33 06 PM" src="https://github.com/user-attachments/assets/6b1899ac-cf97-4820-8dfc-ee9e280b3af5" />
+
 - We have to generate the SonarQube token.
 - Click on “Administration” tab
 - Click on the drop down on “security” tab
@@ -461,6 +476,8 @@ docker run -d --name sonar -p 9000:9000 sonarqube:lts-community
 - Click on “Generate”
 - Copy the key and save it somewhere
 - Then click on “Done”
+
+<img width="1280" height="470" alt="Screenshot 2026-10-11 at 1 34 17 PM" src="https://github.com/user-attachments/assets/5fd736a5-067d-49e2-a365-235f6a0f40ce" />
 
 ### Create the file “sonar-project.properties” in our GitHub repository
 - We have to create a file called “sonar-project.properties”
@@ -476,6 +493,8 @@ sonar.java.binaries=.
 - Commit the changes by clicking on “commit changes”
 - Click on “commit changes” again
 - We have added the file.
+
+<img width="1893" height="351" alt="Screenshot 2026-10-11 at 1 35 51 PM" src="https://github.com/user-attachments/assets/422284cc-665a-4119-8c26-b4b7b99ad1e0" />
 
 ### Adding Actions related to SonarQube
 - Let us now go to our pipeline and add the job for SonarQube. First search on google for “SonarQube Action”
@@ -541,6 +560,8 @@ https://github.com/marketplace/actions/official-sonarqube-scan
 - Then click on “Add Secret”
 - We have added a secret.
 
+<img width="1189" height="714" alt="Screenshot 2026-10-11 at 1 42 40 PM" src="https://github.com/user-attachments/assets/c74dea2f-1bff-47b2-9668-519a12e8643c" />
+
 ### Adding the Variable “SONAR_HOST_URL”
 - Let us add the variable that is “SONAR_HOST_URL”.
 - Select the “Variable” tab
@@ -550,6 +571,8 @@ https://github.com/marketplace/actions/official-sonarqube-scan
 - Copy the highlighted part and paste on the “value” field in GitHub
 - Click on “Add Variable”
 - We have added our variables.
+
+<img width="1176" height="710" alt="Screenshot 2026-10-11 at 1 43 14 PM" src="https://github.com/user-attachments/assets/69b113eb-27dc-4e5a-91b4-e6f503b0734d" />
 
 ### Test the jobs that have been added
 - Let us test the jobs that we have added so far by running the pipeline.
