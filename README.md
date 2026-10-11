@@ -197,21 +197,29 @@ steps:
 - On “AMI”, I will select “ubuntu”
 - On “Instance Type”, select “t2.medium”
 
+<img width="1267" height="478" alt="Screenshot 2026-10-11 at 12 10 03 PM" src="https://github.com/user-attachments/assets/08effe0b-a398-4ff8-adaa-2b80a00cfe49" />
 
 - Scroll down to “Key Pair”
 - Click on “Create new key pair”
 - Enter the name of the key pair, we will call it “runner-key”
 - Then click on “create key pair”
 
+<img width="1244" height="697" alt="Screenshot 2026-10-11 at 12 08 45 PM" src="https://github.com/user-attachments/assets/716fe98c-ca75-4fb7-8d9c-ebf1a239697a" />
 
 - Then scroll down to “Network settings” and select “Allow SSH traffic from”, “Allow HTTPS traffic from internet”, “Allow HTTP traffic from internet”
 
+<img width="1235" height="718" alt="Screenshot 2026-10-11 at 12 11 33 PM" src="https://github.com/user-attachments/assets/c062807b-e594-4554-ab0f-12b1961ffe98" />
 
 - One “Configure storage”, make it “20” GiB
+
+<img width="1230" height="313" alt="Screenshot 2026-10-11 at 12 12 16 PM" src="https://github.com/user-attachments/assets/b6e8a5a6-751a-442a-908f-b02d31dc8bf3" />
+
 - Then click on “Launch Instance”
 - Click on “Instances”
 - You can see that the instance is initializing. Wait for it to pass the “2/2 check”
 - You can see that it has passed the “2/2 check”
+
+<img width="1591" height="231" alt="Screenshot 2026-10-11 at 1 13 01 PM" src="https://github.com/user-attachments/assets/60ada70c-988c-4b86-b1b6-8e16e89a6e47" />
 
 ### SSH Connect to the Instance
 
@@ -227,6 +235,8 @@ ssh -i "runner-key.pem" ubuntu@ec2-174-129-114-216.compute-1.amazonaws.com
 - Enter “yes” and press “Enter”
 - We are now connected to the instance.
 
+<img width="714" height="156" alt="Screenshot 2026-10-11 at 12 14 04 PM" src="https://github.com/user-attachments/assets/7f2d3368-6c83-463f-9bde-589e7cf6ae66" />
+
 ### Install Tools
 
 - We have to install all the tools we need in this project as shown on the architecture.
@@ -240,6 +250,8 @@ sudo apt update
 ```bash
 sudo apt install maven -y
 ```
+
+<img width="711" height="151" alt="Screenshot 2026-10-11 at 12 15 54 PM" src="https://github.com/user-attachments/assets/182d1f7f-204b-44d3-8342-bcc8aee9d7e8" />
 
 #### Install unzip
 - We have to install unzip but ley us first update the package using the command:
@@ -285,54 +297,20 @@ token BVAKISJXU3CWNDDV6MEXZF3I7BZ42
 $ ./run.sh
 ```
 
-#### Using your self-hosted runner
-```bash
-# Use this YAML in your workflow file for each job
-runs-on: self-hosted
-```
-- We have to now run these commands on the terminal of our EC2 instance “runner”
-- We will first update the package using the command:
-```bash
-sudo apt update
-```
-- Create a folder called “actions-runner” using the command:
-```bash
-mkdir actions-runner
-```
-- Navigate to the created folder using the command:
-```bash
-cd actions-runner
-```
-- Download the latest runner package using this command:
-```bash
-curl -o actions-runner-linux-x64-2.329.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.329.0/actionsrunner-linux-x64-2.329.0.tar.gz
-```
-- Extract the installer using this command:
-```bash
-tar xzf ./actions-runner-linux-x64-2.329.0.tar.gz
-```
 - List the content of the folder using the command:
 ```bash
 ls
 ```
+<img width="693" height="158" alt="Screenshot 2026-10-11 at 12 20 16 PM" src="https://github.com/user-attachments/assets/31745107-7114-4fa3-a914-c9ca429c111a" />
+
 - I am going to remove the action package using the command:
 ```bash
 rm actions-runner-linux-x64-2.329.0.tar.gz
 ```
-- Run the command to check the content again
-```bash
-ls
-```
+
 - Create the runner and start the configuration experience
 ```bash
 ./config.sh --url https://github.com/ebotsidneysmith/Java-Based-GithubAction --token BVAKISJVV6D35BC3FBVSI33I7FQMW
-```
-- In case you have this error, it means your runner is offline and it is not running. To resolve this go back to your runner on your GitHub.
-- You can see the runner is offline. Click on “New self-hosted runner”
-- Select “Linux”
-- Copy the above configure command:
-```bash
-./config.sh --url https://github.com/ebotsidneysmith/Java-BasedGithubAction --token BVAKISIBMQSCEWTHG6XYTZDI7RFTW
 ```
 - Then run this command on your “runner” terminal
 - We do not have a runner group, so just press “Enter”
@@ -340,17 +318,31 @@ ls
 - For label, we will use “self-hosted”. Type “self-hosted” and press “Enter”
 - We will use the default work folder, so just press “Enter”
 - The runner is saved. So, we have set up our runner. Let us now start the runner using the command:
+
+<img width="726" height="402" alt="Screenshot 2026-10-11 at 12 24 31 PM" src="https://github.com/user-attachments/assets/b2544e20-0aea-4e15-8405-131cbca7539d" />
+
 ```bash
 ./run.sh
 ```
+
+<img width="554" height="152" alt="Screenshot 2026-10-11 at 12 25 30 PM" src="https://github.com/user-attachments/assets/d0ca3219-8b60-4174-ab04-3b055b4938e4" />
+
 - We are now connected to GitHub. We can now go to our pipeline code and change all the “ubuntulatest” to “self-hosted”.
 - Commit the changes by clicking on “Commit changes”
 - Click on “commit changes” again
+
+<img width="1220" height="225" alt="Screenshot 2026-10-11 at 12 28 54 PM" src="https://github.com/user-attachments/assets/2fafccbf-bde5-4a2a-a8ee-16d6058ad9e1" />
+
 - Then click on “Actions”
 - Click on the updated pipeline “Update cicd.yml"
 - You can see that the jobs have started running. Wait for it to run all the jobs
 - You can see that the three jobs are successful. Head back to our EC2 instance terminal
+
+<img width="1453" height="437" alt="Screenshot 2026-10-11 at 1 08 39 PM" src="https://github.com/user-attachments/assets/15b1c962-6d02-45ee-a6a4-7e946ad90a3c" />
+
 - You can see that the runner is able to pick up our jobs
+
+<img width="829" height="97" alt="Screenshot 2026-10-11 at 1 09 01 PM" src="https://github.com/user-attachments/assets/f0600ab6-785d-4333-9e82-ec20d7bb9b5e" />
 
 ### Adding the remaining jobs / stages
 
