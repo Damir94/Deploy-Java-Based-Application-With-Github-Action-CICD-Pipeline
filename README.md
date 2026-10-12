@@ -1,4 +1,3 @@
-
 # Deploy a Java-Based Application With GitHub Action CI/CD Pipeline
 
 <img width="1012" height="362" alt="Screenshot 2026-10-10 at 10 39 52 AM" src="https://github.com/user-attachments/assets/8d7712cd-ad5d-4085-9b97-b7d88a4f8f97" />
